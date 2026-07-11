@@ -12,8 +12,9 @@ export function MapTab() {
         <h2 className="font-[family-name:var(--font-display)] text-2xl text-[var(--parchment)]">
           The path
         </h2>
-        <p className="w-full text-sm text-[var(--parchment-dim)] sm:w-auto sm:ml-auto">
-          Scroll to draw the route. Click a node to open it.
+        <p className="w-full text-sm text-[var(--parchment-dim)] sm:ml-auto sm:w-auto">
+          Scroll slowly — the path follows the node under the focus line, through
+          Character Sheet at the end.
         </p>
       </div>
       <LevelMap />
