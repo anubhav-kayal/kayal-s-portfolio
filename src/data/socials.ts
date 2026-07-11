@@ -1,7 +1,9 @@
 import type { CompetitiveStats, SocialLink } from "./types";
 
-/** Swap this for your real GitHub username — powers Stats contribution graph */
+/** Swap these for live Stats — also overridable via LEETCODE_USER / CF_HANDLE / GITHUB_USERNAME */
 export const githubUsername = "your-handle";
+export const leetcodeUsername = "your-handle";
+export const codeforcesHandle = "your-handle";
 
 export const socials: SocialLink[] = [
   {
@@ -31,21 +33,20 @@ export const socials: SocialLink[] = [
   {
     id: "leetcode",
     label: "LeetCode",
-    href: "https://leetcode.com/u/your-handle",
-    handle: "your-handle",
+    href: `https://leetcode.com/u/${leetcodeUsername}`,
+    handle: leetcodeUsername,
   },
   {
     id: "codeforces",
     label: "Codeforces",
-    href: "https://codeforces.com/profile/your-handle",
-    handle: "your-handle",
+    href: `https://codeforces.com/profile/${codeforcesHandle}`,
+    handle: codeforcesHandle,
   },
 ];
 
-/** Static placeholders — Phase 3 will fetch live LeetCode / CF data */
 export const competitiveStats: CompetitiveStats = {
   leetcode: {
-    username: "your-handle",
+    username: leetcodeUsername,
     totalSolved: 0,
     easy: 0,
     medium: 0,
@@ -53,7 +54,7 @@ export const competitiveStats: CompetitiveStats = {
     ranking: null,
   },
   codeforces: {
-    handle: "your-handle",
+    handle: codeforcesHandle,
     rating: 0,
     maxRating: 0,
     rank: "unrated",

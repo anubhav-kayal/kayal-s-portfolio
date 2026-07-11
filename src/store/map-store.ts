@@ -43,6 +43,7 @@ type MapStore = {
   markViewed: (id: string) => void;
   unlock: (id: string) => void;
   unlockThroughOrder: (maxOrder: number) => void;
+  unlockSecret: () => void;
   /** Unlock next node in sequence when current is reached */
   unlockNextFrom: (id: string) => void;
   openNode: (id: string) => void;
@@ -94,13 +95,14 @@ export const useMapStore = create<MapStore>((set, get) => ({
       return { unlockedIds };
     }),
 
-  /** Unlock every node with unlockOrder <= maxOrder (one persist) */
+  /** Unlock every non-secret node with unlockOrder <= maxOrder (one persist) */
   unlockThroughOrder: (maxOrder: number) =>
     set((state) => {
       let changed = false;
       const unlockedIds = new Set(state.unlockedIds);
       const viewedIds = new Set(state.viewedIds);
       for (const n of nodes) {
+        if (n.type === "secret") continue;
         if (n.unlockOrder <= maxOrder) {
           if (!unlockedIds.has(n.id)) {
             unlockedIds.add(n.id);
@@ -112,17 +114,34 @@ export const useMapStore = create<MapStore>((set, get) => ({
           }
         }
       }
+      // Auto-reveal secret once the main path is fully cleared
+      if (maxOrder >= 12 && !unlockedIds.has("secret")) {
+        unlockedIds.add("secret");
+        changed = true;
+      }
       if (!changed) return state;
       persistState(unlockedIds, viewedIds);
       return { unlockedIds, viewedIds };
+    }),
+
+  unlockSecret: () =>
+    set((state) => {
+      if (state.unlockedIds.has("secret")) return state;
+      const unlockedIds = new Set(state.unlockedIds);
+      unlockedIds.add("secret");
+      persistState(unlockedIds, state.viewedIds);
+      return { unlockedIds, activeTab: "map" as TabId };
     }),
 
   unlockNextFrom: (id) => {
     const state = get();
     if (!state.unlockedIds.has(id)) return;
     const current = nodes.find((n) => n.id === id);
-    if (!current) return;
-    const next = nodes.find((n) => n.unlockOrder === current.unlockOrder + 1);
+    if (!current || current.type === "secret") return;
+    const next = nodes.find(
+      (n) =>
+        n.type !== "secret" && n.unlockOrder === current.unlockOrder + 1,
+    );
     if (next) get().unlock(next.id);
   },
 
@@ -132,14 +151,22 @@ export const useMapStore = create<MapStore>((set, get) => ({
     const viewedIds = new Set(state.viewedIds);
     viewedIds.add(id);
     persistState(state.unlockedIds, viewedIds);
-    // Opening a node unlocks the next in the chain
     const current = nodes.find((n) => n.id === id);
     let unlockedIds = state.unlockedIds;
-    if (current) {
-      const next = nodes.find((n) => n.unlockOrder === current.unlockOrder + 1);
+    if (current && current.type !== "secret") {
+      const next = nodes.find(
+        (n) =>
+          n.type !== "secret" && n.unlockOrder === current.unlockOrder + 1,
+      );
       if (next && !unlockedIds.has(next.id)) {
         unlockedIds = new Set(unlockedIds);
         unlockedIds.add(next.id);
+        persistState(unlockedIds, viewedIds);
+      }
+      // Opening checkpoint also reveals secret
+      if (current.id === "checkpoint" && !unlockedIds.has("secret")) {
+        unlockedIds = new Set(unlockedIds);
+        unlockedIds.add("secret");
         persistState(unlockedIds, viewedIds);
       }
     }
@@ -162,11 +189,14 @@ export const useMapStore = create<MapStore>((set, get) => ({
       }
       const parsed = JSON.parse(raw) as PersistedProgress;
       const validIds = new Set(nodes.map((n) => n.id));
+      const hadSecret = (parsed.unlockedIds ?? []).includes("secret");
       const unlockedIds = new Set(
-        (parsed.unlockedIds ?? []).filter((id) => validIds.has(id)),
+        (parsed.unlockedIds ?? []).filter(
+          (id) => validIds.has(id) && id !== "secret",
+        ),
       );
       unlockedIds.add(START_ID);
-      // Ensure contiguous unlock from start (no holes)
+      // Contiguous unlock for main path only — secret is opt-in
       const maxOrder = Math.max(
         0,
         ...[...unlockedIds].map(
@@ -174,8 +204,10 @@ export const useMapStore = create<MapStore>((set, get) => ({
         ),
       );
       for (const n of nodes) {
+        if (n.type === "secret") continue;
         if (n.unlockOrder <= maxOrder) unlockedIds.add(n.id);
       }
+      if (hadSecret || maxOrder >= 12) unlockedIds.add("secret");
       const viewedIds = new Set(
         (parsed.viewedIds ?? []).filter((id) => validIds.has(id)),
       );
