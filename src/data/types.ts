@@ -1,4 +1,4 @@
-export type NodeType = "project" | "boss" | "start" | "checkpoint";
+export type NodeType = "project" | "boss" | "start" | "checkpoint" | "secret";
 
 export type NodeMedia = {
   src: string;

@@ -231,11 +231,34 @@ export const nodes: MapNode[] = [
     y: 1880,
     unlockOrder: 12,
     summary:
-      "Live competitive programming stats land here — LeetCode + Codeforces placeholders for now.",
+      "Competitive programming stats — live feed when handles are set, placeholders otherwise.",
     tech: [],
     links: {},
   },
+  {
+    id: "secret",
+    type: "secret",
+    title: "Secret Level",
+    x: 620,
+    y: 2060,
+    unlockOrder: 13,
+    summary:
+      "You found the hidden node. Konami (↑↑↓↓←→←→BA) or clear the whole path to open it.",
+    tech: ["curiosity", "persistence"],
+    links: {},
+    impact: "Easter egg unlocked — thanks for exploring.",
+  },
 ];
+
+/** Nodes on the default scroll path (excludes secret until unlocked) */
+export function pathNodes(unlockedIds?: Set<string>): MapNode[] {
+  return nodes.filter(
+    (n) => n.type !== "secret" || (unlockedIds?.has(n.id) ?? false),
+  );
+}
+
+export const SECRET_ID = "secret";
+export const CHECKPOINT_ORDER = 12;
 
 export const nodesByUnlock = [...nodes].sort(
   (a, b) => a.unlockOrder - b.unlockOrder,
@@ -243,8 +266,10 @@ export const nodesByUnlock = [...nodes].sort(
 
 export function getNextUnlockId(unlockedIds: Set<string>): string | null {
   for (const node of nodesByUnlock) {
+    if (node.type === "secret") continue;
     if (!unlockedIds.has(node.id)) return node.id;
   }
+  if (!unlockedIds.has(SECRET_ID)) return SECRET_ID;
   return null;
 }
 
@@ -262,6 +287,6 @@ export function buildPathD(mapNodes: MapNode[]): string {
   return d;
 }
 
-export const MAP_VIEWBOX = { width: 900, height: 2000 } as const;
+export const MAP_VIEWBOX = { width: 900, height: 2180 } as const;
 
 export const PROGRESS_STORAGE_KEY = "portfolio-progress";
