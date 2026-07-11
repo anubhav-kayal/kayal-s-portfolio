@@ -20,9 +20,26 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Anubhav Kayal — Level Map Portfolio",
+  metadataBase: new URL("https://anubhavkayal.dev"),
+  title: {
+    default: "Anubhav Kayal — Level Map Portfolio",
+    template: "%s · Anubhav Kayal",
+  },
   description:
-    "A scroll-through level map: projects as waypoints, internships as boss encounters, competitive programming as a live character sheet.",
+    "A scroll-through level map: projects as waypoints, internships as boss encounters, academics & achievements, competitive programming as a live character sheet.",
+  openGraph: {
+    title: "Anubhav Kayal — Level Map Portfolio",
+    description:
+      "Projects as waypoints. Internships as boss encounters. Scroll the path.",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anubhav Kayal — Level Map Portfolio",
+    description:
+      "Projects as waypoints. Internships as boss encounters. Scroll the path.",
+  },
 };
 
 const themeInitScript = `(function(){try{var k='portfolio-theme';var t=localStorage.getItem(k);if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){document.documentElement.dataset.theme='dark'}})();`;
