@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { buildPathD, MAP_VIEWBOX, nodes } from "@/data/nodes";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  buildPathD,
+  CHECKPOINT_ORDER,
+  MAP_VIEWBOX,
+  nodes,
+  pathNodes,
+} from "@/data/nodes";
 import { useMapStore } from "@/store/map-store";
 import { useSound } from "@/components/juice/SoundProvider";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -9,9 +15,9 @@ import { MapNodeMarker } from "./MapNodeMarker";
 import { MapTerrain } from "./map/MapTerrain";
 import { UnlockParticles } from "./map/UnlockParticles";
 
-const pathD = buildPathD(nodes);
-const START_Y = nodes[0]?.y ?? 0;
-const END_Y = nodes[nodes.length - 1]?.y ?? MAP_VIEWBOX.height;
+const MAIN_PATH = pathNodes();
+const START_Y = MAIN_PATH[0]?.y ?? 0;
+const END_Y = MAIN_PATH[MAIN_PATH.length - 1]?.y ?? MAP_VIEWBOX.height;
 const Y_SPAN = Math.max(END_Y - START_Y, 1);
 
 function clamp(n: number, min: number, max: number) {
@@ -32,6 +38,23 @@ export function LevelMap() {
   const unlockedIds = useMapStore((s) => s.unlockedIds);
   const { play } = useSound();
   const prevUnlock = useRef(unlockedIds.size);
+
+  const secretUnlocked = unlockedIds.has("secret");
+  const pathD = useMemo(() => buildPathD(MAIN_PATH), []);
+  const secretNode = nodes.find((n) => n.type === "secret");
+  const secretSpurD =
+    secretUnlocked && secretNode
+      ? (() => {
+          const last = MAIN_PATH[MAIN_PATH.length - 1];
+          if (!last) return "";
+          const midY = (last.y + secretNode.y) / 2;
+          return `M ${last.x} ${last.y} C ${last.x} ${midY}, ${secretNode.x} ${midY}, ${secretNode.x} ${secretNode.y}`;
+        })()
+      : "";
+  const visibleNodes = useMemo(
+    () => pathNodes(unlockedIds),
+    [unlockedIds],
+  );
 
   useEffect(() => {
     if (unlockedIds.size > prevUnlock.current) {
@@ -71,6 +94,7 @@ export function LevelMap() {
       const focusSvgY =
         ((focusLine - rect.top) / mapHeight) * MAP_VIEWBOX.height;
 
+      // Progress always measured against the main path (spawn → checkpoint)
       const pathProgress = clamp((focusSvgY - START_Y) / Y_SPAN, 0, 1);
       path.style.strokeDashoffset = `${length * (1 - pathProgress)}`;
 
@@ -79,13 +103,13 @@ export function LevelMap() {
       }
 
       let order = 0;
-      for (const node of nodes) {
+      for (const node of MAIN_PATH) {
         if (node.y <= focusSvgY + 30) {
           order = Math.max(order, node.unlockOrder);
         }
       }
       if (pathProgress >= 0.995) {
-        order = nodes[nodes.length - 1]?.unlockOrder ?? order;
+        order = CHECKPOINT_ORDER;
       }
 
       if (order > lastOrderRef.current) {
@@ -113,7 +137,6 @@ export function LevelMap() {
     <div className={`relative w-full ${!reducedMotion ? "map-cursor-zone" : ""}`}>
       <UnlockParticles />
 
-      {/* Far parallax haze */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 bottom-[45vh] opacity-60"
         style={{
@@ -189,7 +212,20 @@ export function LevelMap() {
             strokeLinejoin="round"
           />
 
-          {nodes.map((node) => (
+          {secretSpurD && (
+            <path
+              d={secretSpurD}
+              fill="none"
+              stroke="var(--amber)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray="6 5"
+              opacity="0.85"
+            />
+          )}
+
+          {visibleNodes.map((node) => (
             <MapNodeMarker
               key={node.id}
               node={node}
@@ -216,7 +252,7 @@ export function LevelMap() {
             }}
             aria-hidden
           />
-          {nodes.map((node, index) => {
+          {visibleNodes.map((node, index) => {
             const locked = !unlockedIds.has(node.id);
             return (
               <li key={node.id} className="relative flex gap-4 pb-8 last:pb-0">
@@ -230,13 +266,15 @@ export function LevelMap() {
                   className={`relative z-10 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-[11px] font-mono transition disabled:opacity-40 ${
                     node.type === "boss"
                       ? "border-[var(--coral)] bg-[var(--ink)] text-[var(--coral)]"
-                      : node.type === "start" || node.type === "checkpoint"
-                        ? "border-[var(--teal)] bg-[var(--ink)] text-[var(--teal)]"
-                        : "border-[var(--amber)] bg-[var(--ink)] text-[var(--amber)]"
+                      : node.type === "secret"
+                        ? "border-[var(--amber)] bg-[var(--ink)] text-[var(--amber)]"
+                        : node.type === "start" || node.type === "checkpoint"
+                          ? "border-[var(--teal)] bg-[var(--ink)] text-[var(--teal)]"
+                          : "border-[var(--amber)] bg-[var(--ink)] text-[var(--amber)]"
                   }`}
                   aria-label={locked ? `Locked ${node.title}` : `Open ${node.title}`}
                 >
-                  {locked ? "·" : index + 1}
+                  {locked ? "·" : node.type === "secret" ? "?" : index + 1}
                 </button>
                 <button
                   type="button"
