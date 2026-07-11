@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" fill="none">
+  <rect width="800" height="450" fill="#171b26"/>
+  <rect x="1" y="1" width="798" height="448" stroke="#e3a857" stroke-opacity="0.35"/>
+  <text x="400" y="210" text-anchor="middle" fill="#e3a857" font-family="monospace" font-size="18" letter-spacing="0.12em">MEDIA PLACEHOLDER</text>
+  <text x="400" y="245" text-anchor="middle" fill="#c9c2ad" font-family="monospace" font-size="13">Drop a screenshot or GIF in /public/media</text>
+</svg>
