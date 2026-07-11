@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+:root,
+[data-theme="dark"] {
+  --ink: #11141c;
+  --ink-2: #171b26;
+  --parchment: #f3ede0;
+  --parchment-dim: #c9c2ad;
+  --amber: #e3a857;
+  --amber-dim: #8a6a35;
+  --coral: #e2704b;
+  --teal: #4a9c8c;
+  --line: rgba(243, 237, 224, 0.14);
+  --line-strong: rgba(243, 237, 224, 0.28);
+  --grid-line: rgba(243, 237, 224, 0.04);
+  --overlay: rgba(0, 0, 0, 0.7);
+  --background: var(--ink);
+  --foreground: var(--parchment);
+}
+
+[data-theme="light"] {
+  --ink: #f4efe4;
+  --ink-2: #ebe4d4;
+  --parchment: #1a1f2b;
+  --parchment-dim: #5a6170;
+  --amber: #b8792a;
+  --amber-dim: #8a5f22;
+  --coral: #c45a38;
+  --teal: #2f7a6c;
+  --line: rgba(26, 31, 43, 0.1);
+  --line-strong: rgba(26, 31, 43, 0.2);
+  --grid-line: rgba(26, 31, 43, 0.05);
+  --overlay: rgba(26, 31, 43, 0.45);
+  --background: var(--ink);
+  --foreground: var(--parchment);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+  --font-display: var(--font-fraunces);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  min-height: 100%;
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease;
+}
+
+.app-grid {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black, transparent);
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+::selection {
+  background: rgba(227, 168, 87, 0.35);
+  color: var(--parchment);
+}
+
+[data-theme="light"] ::selection {
+  background: rgba(184, 121, 42, 0.28);
+  color: var(--parchment);
+}
