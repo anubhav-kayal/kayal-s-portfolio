@@ -12,6 +12,7 @@ export function NodeModal() {
   const node = nodes.find((n) => n.id === activeNodeId) ?? null;
   const isBoss = node?.type === "boss";
   const isProject = node?.type === "project";
+  const isSecret = node?.type === "secret";
   const { play } = useSound();
   const [shake, setShake] = useState(false);
 
@@ -77,7 +78,9 @@ export function NodeModal() {
             className={`relative z-10 max-h-[85vh] w-full max-w-lg overflow-y-auto border ${
               isBoss
                 ? "border-[var(--coral)]/50 bg-[var(--surface-elevated)]"
-                : "border-[var(--line-strong)] bg-[var(--surface-elevated)]"
+                : isSecret
+                  ? "border-[var(--amber)]/50 bg-[var(--surface-elevated)]"
+                  : "border-[var(--line-strong)] bg-[var(--surface-elevated)]"
             }`}
             style={{ borderRadius: 8 }}
           >
@@ -85,10 +88,12 @@ export function NodeModal() {
               className={`px-5 py-3 font-mono text-[11px] uppercase tracking-[0.14em] ${
                 isBoss
                   ? "bg-[rgba(226,112,75,0.12)] text-[var(--coral)]"
-                  : "bg-[rgba(227,168,87,0.1)] text-[var(--amber)]"
+                  : isSecret
+                    ? "bg-[rgba(227,168,87,0.14)] text-[var(--amber)]"
+                    : "bg-[rgba(227,168,87,0.1)] text-[var(--amber)]"
               }`}
             >
-              {isBoss ? "Boss encounter" : node.type}
+              {isBoss ? "Boss encounter" : isSecret ? "Secret level" : node.type}
               {node.period ? ` · ${node.period}` : ""}
             </div>
 
@@ -145,6 +150,17 @@ export function NodeModal() {
                 <div className="mt-5 border-l-2 border-[var(--coral)] pl-4">
                   <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--coral)]">
                     Outcome
+                  </span>
+                  <p className="mt-1 text-[15px] text-[var(--parchment)]">
+                    {node.impact}
+                  </p>
+                </div>
+              )}
+
+              {isSecret && node.impact && (
+                <div className="mt-5 border-l-2 border-[var(--amber)] pl-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--amber)]">
+                    Discovery
                   </span>
                   <p className="mt-1 text-[15px] text-[var(--parchment)]">
                     {node.impact}
