@@ -10,6 +10,7 @@ export function NodeModal() {
   const closeNode = useMapStore((s) => s.closeNode);
   const node = nodes.find((n) => n.id === activeNodeId) ?? null;
   const isBoss = node?.type === "boss";
+  const isProject = node?.type === "project";
 
   useEffect(() => {
     if (!activeNodeId) return;
@@ -62,10 +63,10 @@ export function NodeModal() {
                 : { opacity: 0, y: 24 }
             }
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className={`relative z-10 w-full max-w-lg overflow-hidden border ${
+            className={`relative z-10 max-h-[85vh] w-full max-w-lg overflow-y-auto border ${
               isBoss
-                ? "border-[var(--coral)]/50 bg-[var(--ink-2)]"
-                : "border-[var(--line-strong)] bg-[var(--ink-2)]"
+                ? "border-[var(--coral)]/50 bg-[var(--surface-elevated)]"
+                : "border-[var(--line-strong)] bg-[var(--surface-elevated)]"
             }`}
             style={{ borderRadius: 8 }}
           >
@@ -79,6 +80,15 @@ export function NodeModal() {
               {isBoss ? "Boss encounter" : node.type}
               {node.period ? ` · ${node.period}` : ""}
             </div>
+
+            {isProject && node.media?.[0] && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={node.media[0].src}
+                alt={node.media[0].alt}
+                className="aspect-[16/9] w-full border-b border-[var(--line)] object-cover"
+              />
+            )}
 
             <div className="px-5 py-5">
               {isBoss && node.company && (
@@ -95,6 +105,27 @@ export function NodeModal() {
               <p className="mt-3 text-[15px] leading-relaxed text-[var(--parchment-dim)]">
                 {node.summary}
               </p>
+
+              {isProject && node.caseStudy && (
+                <div className="mt-6 space-y-4">
+                  {(
+                    [
+                      ["Problem", node.caseStudy.problem],
+                      ["Approach", node.caseStudy.approach],
+                      ["Impact", node.caseStudy.impact],
+                    ] as const
+                  ).map(([label, body]) => (
+                    <div key={label} className="border-l-2 border-[var(--amber)] pl-4">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--amber)]">
+                        {label}
+                      </span>
+                      <p className="mt-1 text-[14px] leading-relaxed text-[var(--parchment)]">
+                        {body}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {isBoss && node.impact && (
                 <div className="mt-5 border-l-2 border-[var(--coral)] pl-4">
@@ -116,7 +147,7 @@ export function NodeModal() {
                     {node.tech.map((t) => (
                       <li
                         key={t}
-                        className="border border-[var(--line)] px-2.5 py-1 font-mono text-[11px] text-[var(--parchment-dim)]"
+                        className="border border-[var(--line)] bg-[var(--surface)] px-2.5 py-1 font-mono text-[11px] text-[var(--parchment-dim)]"
                       >
                         {t}
                       </li>
