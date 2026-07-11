@@ -42,12 +42,18 @@ export function CommandPalette() {
     }
 
     for (const node of nodes) {
+      if (node.type === "secret" && !unlockedIds.has(node.id)) continue;
       const locked = !unlockedIds.has(node.id);
       list.push({
         id: `node-${node.id}`,
         label: locked ? `${node.title} (locked)` : node.title,
         hint: node.type,
-        group: node.type === "boss" ? "Experience" : "Map nodes",
+        group:
+          node.type === "boss"
+            ? "Experience"
+            : node.type === "secret"
+              ? "Secret"
+              : "Map nodes",
         run: () => {
           if (locked) {
             setTab("map");
