@@ -15,6 +15,7 @@ const RADIUS: Record<MapNode["type"], number> = {
   project: 15,
   boss: 19,
   checkpoint: 17,
+  secret: 16,
 };
 
 function NodeGlyph({
@@ -78,6 +79,23 @@ function NodeGlyph({
     );
   }
 
+  if (type === "secret") {
+    return (
+      <text
+        x={x}
+        y={y + 5}
+        textAnchor="middle"
+        fill={stroke}
+        fontSize="14"
+        fontFamily="var(--font-display), serif"
+        fontWeight="600"
+        style={{ pointerEvents: "none" }}
+      >
+        ?
+      </text>
+    );
+  }
+
   // Project — flag
   return (
     <g style={{ pointerEvents: "none" }}>
@@ -97,9 +115,11 @@ function MapNodeMarkerInner({ node, viewed, locked, onSelect }: Props) {
     ? "var(--parchment-dim)"
     : node.type === "boss"
       ? "var(--coral)"
-      : node.type === "start" || node.type === "checkpoint"
-        ? "var(--teal)"
-        : "var(--amber)";
+      : node.type === "secret"
+        ? "var(--amber)"
+        : node.type === "start" || node.type === "checkpoint"
+          ? "var(--teal)"
+          : "var(--amber)";
 
   return (
     <g
