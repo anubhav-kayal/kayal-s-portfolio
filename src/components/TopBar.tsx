@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { TABS, useMapStore, type TabId } from "@/store/map-store";
 import { LiveClock } from "./LiveClock";
+import { SoundToggle } from "./juice/SoundToggle";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function TopBar() {
@@ -55,6 +56,7 @@ export function TopBar() {
           >
             ⌘K
           </button>
+          <SoundToggle />
           <ThemeToggle />
         </div>
       </div>
