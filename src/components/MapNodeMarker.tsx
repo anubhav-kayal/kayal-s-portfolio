@@ -1,17 +1,13 @@
 "use client";
 
-import { motion, useMotionValueEvent, type MotionValue } from "framer-motion";
-import { useState } from "react";
+import { memo } from "react";
 import type { MapNode } from "@/data/types";
 
 type Props = {
   node: MapNode;
-  index: number;
-  total: number;
   viewed: boolean;
+  locked: boolean;
   onSelect: () => void;
-  onEnterView: () => void;
-  progress: MotionValue<number>;
 };
 
 const RADIUS: Record<MapNode["type"], number> = {
@@ -21,29 +17,12 @@ const RADIUS: Record<MapNode["type"], number> = {
   checkpoint: 16,
 };
 
-export function MapNodeMarker({
-  node,
-  index,
-  total,
-  viewed,
-  onSelect,
-  onEnterView,
-  progress,
-}: Props) {
-  const [visible, setVisible] = useState(false);
-  const threshold = index / Math.max(total - 1, 1);
-
-  useMotionValueEvent(progress, "change", (v) => {
-    if (v >= threshold - 0.02 && !visible) {
-      setVisible(true);
-      onEnterView();
-    }
-  });
-
+function MapNodeMarkerInner({ node, viewed, locked, onSelect }: Props) {
   const r = RADIUS[node.type];
   const isBoss = node.type === "boss";
-  const stroke =
-    node.type === "boss"
+  const stroke = locked
+    ? "var(--parchment-dim)"
+    : node.type === "boss"
       ? "var(--coral)"
       : node.type === "start" || node.type === "checkpoint"
         ? "var(--teal)"
@@ -52,76 +31,79 @@ export function MapNodeMarker({
   return (
     <g
       role="button"
-      tabIndex={0}
-      aria-label={`${node.type}: ${node.title}`}
-      onClick={onSelect}
+      tabIndex={locked ? -1 : 0}
+      aria-label={`${locked ? "Locked " : ""}${node.type}: ${node.title}`}
+      aria-disabled={locked}
+      onClick={() => {
+        if (!locked) onSelect();
+      }}
       onKeyDown={(e) => {
+        if (locked) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onSelect();
         }
       }}
-      className="cursor-pointer outline-none"
+      className={`outline-none transition-opacity duration-200 ${locked ? "cursor-not-allowed opacity-55" : "cursor-pointer opacity-100"}`}
       style={{ outline: "none" }}
     >
-      <motion.circle
+      <circle
         cx={node.x}
         cy={node.y}
         r={r + 8}
         fill={stroke}
-        initial={{ opacity: 0, scale: 0.4 }}
-        animate={
-          visible
-            ? { opacity: viewed ? 0.18 : 0.08, scale: 1 }
-            : { opacity: 0, scale: 0.4 }
-        }
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        opacity={locked ? 0.04 : viewed ? 0.16 : 0.08}
       />
-      <motion.circle
+      <circle
         cx={node.x}
         cy={node.y}
         r={r}
         fill="var(--ink)"
         stroke={stroke}
         strokeWidth={isBoss ? 2.5 : 2}
-        initial={{ opacity: 0, scale: 0.4 }}
-        animate={visible ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.4 }}
-        transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.05 }}
-        whileHover={{ scale: 1.12 }}
+        strokeDasharray={locked ? "3 3" : undefined}
       />
-      {isBoss && (
-        <motion.polygon
+      {isBoss && !locked && (
+        <polygon
           points={`${node.x},${node.y - 7} ${node.x + 6},${node.y + 4} ${node.x - 6},${node.y + 4}`}
           fill={stroke}
-          initial={{ opacity: 0 }}
-          animate={visible ? { opacity: 1 } : { opacity: 0 }}
         />
       )}
       {!isBoss && (
-        <motion.circle
+        <circle
           cx={node.x}
           cy={node.y}
-          r={4}
+          r={locked ? 3 : 4}
           fill={stroke}
-          initial={{ opacity: 0 }}
-          animate={visible ? { opacity: 1 } : { opacity: 0 }}
+          opacity={locked ? 0.5 : 1}
         />
       )}
-      <motion.text
+      {locked && (
+        <text
+          x={node.x}
+          y={node.y + 4}
+          textAnchor="middle"
+          fill="var(--parchment-dim)"
+          fontSize="9"
+          fontFamily="var(--font-mono), monospace"
+          style={{ pointerEvents: "none" }}
+        >
+          #
+        </text>
+      )}
+      <text
         x={node.x}
         y={node.y + r + 22}
         textAnchor="middle"
         fill="var(--parchment)"
         fontSize="13"
         fontFamily="var(--font-display), serif"
-        initial={{ opacity: 0, y: 6 }}
-        animate={visible ? { opacity: 0.9, y: 0 } : { opacity: 0, y: 6 }}
-        transition={{ delay: 0.1 }}
+        opacity={locked ? 0.4 : 0.9}
         style={{ pointerEvents: "none" }}
       >
         {node.title}
-      </motion.text>
-      <motion.text
+      </text>
+      <text
         x={node.x}
         y={node.y + r + 38}
         textAnchor="middle"
@@ -129,12 +111,13 @@ export function MapNodeMarker({
         fontSize="10"
         fontFamily="var(--font-mono), monospace"
         letterSpacing="0.08em"
-        initial={{ opacity: 0 }}
-        animate={visible ? { opacity: 0.7, y: 0 } : { opacity: 0 }}
+        opacity={locked ? 0.4 : 0.7}
         style={{ pointerEvents: "none", textTransform: "uppercase" }}
       >
-        {node.type}
-      </motion.text>
+        {locked ? "locked" : node.type}
+      </text>
     </g>
   );
 }
+
+export const MapNodeMarker = memo(MapNodeMarkerInner);
