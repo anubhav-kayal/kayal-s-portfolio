@@ -1,11 +1,14 @@
 import type { CompetitiveStats, SocialLink } from "./types";
 
+/** Swap this for your real GitHub username — powers Stats contribution graph */
+export const githubUsername = "your-handle";
+
 export const socials: SocialLink[] = [
   {
     id: "github",
     label: "GitHub",
-    href: "https://github.com/your-handle",
-    handle: "@your-handle",
+    href: `https://github.com/${githubUsername}`,
+    handle: `@${githubUsername}`,
   },
   {
     id: "linkedin",
@@ -39,7 +42,7 @@ export const socials: SocialLink[] = [
   },
 ];
 
-/** Static placeholders — Phase 4 will fetch live LeetCode / CF data */
+/** Static placeholders — Phase 3 will fetch live LeetCode / CF data */
 export const competitiveStats: CompetitiveStats = {
   leetcode: {
     username: "your-handle",
