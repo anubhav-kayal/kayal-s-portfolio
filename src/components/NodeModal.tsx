@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSound } from "@/components/juice/SoundProvider";
 import { nodes } from "@/data/nodes";
 import { useMapStore } from "@/store/map-store";
 
@@ -11,6 +12,8 @@ export function NodeModal() {
   const node = nodes.find((n) => n.id === activeNodeId) ?? null;
   const isBoss = node?.type === "boss";
   const isProject = node?.type === "project";
+  const { play } = useSound();
+  const [shake, setShake] = useState(false);
 
   useEffect(() => {
     if (!activeNodeId) return;
@@ -20,17 +23,37 @@ export function NodeModal() {
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    const n = nodes.find((x) => x.id === activeNodeId);
+    if (n?.type === "boss") {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      play("boss");
+      if (!reduce) {
+        const id = window.requestAnimationFrame(() => {
+          setShake(true);
+          window.setTimeout(() => setShake(false), 300);
+        });
+        return () => {
+          window.cancelAnimationFrame(id);
+          window.removeEventListener("keydown", onKey);
+          document.body.style.overflow = prev;
+        };
+      }
+    }
+
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [activeNodeId, closeNode]);
+  }, [activeNodeId, closeNode, play]);
+
+  const media = node?.media ?? [];
 
   return (
     <AnimatePresence>
       {node && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
+          className={`fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center ${shake ? "boss-shake" : ""}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -47,21 +70,9 @@ export function NodeModal() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="node-modal-title"
-            initial={
-              isBoss
-                ? { opacity: 0, scale: 0.88, y: 24, rotateX: 8 }
-                : { opacity: 0, y: 40 }
-            }
-            animate={
-              isBoss
-                ? { opacity: 1, scale: 1, y: 0, rotateX: 0 }
-                : { opacity: 1, y: 0 }
-            }
-            exit={
-              isBoss
-                ? { opacity: 0, scale: 0.92, y: 16 }
-                : { opacity: 0, y: 24 }
-            }
+            initial={isBoss ? { opacity: 0, scale: 0.88, y: 24 } : { opacity: 0, y: 40 }}
+            animate={isBoss ? { opacity: 1, scale: 1, y: 0 } : { opacity: 1, y: 0 }}
+            exit={isBoss ? { opacity: 0, scale: 0.92, y: 16 } : { opacity: 0, y: 24 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             className={`relative z-10 max-h-[85vh] w-full max-w-lg overflow-y-auto border ${
               isBoss
@@ -81,13 +92,16 @@ export function NodeModal() {
               {node.period ? ` · ${node.period}` : ""}
             </div>
 
-            {isProject && node.media?.[0] && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={node.media[0].src}
-                alt={node.media[0].alt}
-                className="aspect-[16/9] w-full border-b border-[var(--line)] object-cover"
-              />
+            {isProject && media.length > 0 && (
+              <div className="relative border-b border-[var(--line)] bg-[var(--ink)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={media[0]?.src}
+                  alt={media[0]?.alt ?? node.title}
+                  className="aspect-[16/9] w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
             )}
 
             <div className="px-5 py-5">
