@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { buildPathD, MAP_VIEWBOX, nodes } from "@/data/nodes";
 import { useMapStore } from "@/store/map-store";
+import { useSound } from "@/components/juice/SoundProvider";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { MapNodeMarker } from "./MapNodeMarker";
+import { MapTerrain } from "./map/MapTerrain";
+import { UnlockParticles } from "./map/UnlockParticles";
 
 const pathD = buildPathD(nodes);
 const START_Y = nodes[0]?.y ?? 0;
@@ -19,11 +23,22 @@ export function LevelMap() {
   const pathRef = useRef<SVGPathElement>(null);
   const lengthRef = useRef(0);
   const lastOrderRef = useRef(-1);
+  const [parallax, setParallax] = useState(0);
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   const openNode = useMapStore((s) => s.openNode);
   const unlockThroughOrder = useMapStore((s) => s.unlockThroughOrder);
   const viewedIds = useMapStore((s) => s.viewedIds);
   const unlockedIds = useMapStore((s) => s.unlockedIds);
+  const { play } = useSound();
+  const prevUnlock = useRef(unlockedIds.size);
+
+  useEffect(() => {
+    if (unlockedIds.size > prevUnlock.current) {
+      play("unlock");
+    }
+    prevUnlock.current = unlockedIds.size;
+  }, [unlockedIds, play]);
 
   useEffect(() => {
     const wrap = svgWrapRef.current;
@@ -48,7 +63,6 @@ export function LevelMap() {
       const length = lengthRef.current;
       if (length <= 0) return;
 
-      // Measure the SVG only — never include scroll spacer padding
       const rect = wrap.getBoundingClientRect();
       const viewH = window.innerHeight || 1;
       const focusLine = viewH * 0.45;
@@ -59,6 +73,10 @@ export function LevelMap() {
 
       const pathProgress = clamp((focusSvgY - START_Y) / Y_SPAN, 0, 1);
       path.style.strokeDashoffset = `${length * (1 - pathProgress)}`;
+
+      if (!reducedMotion) {
+        setParallax(clamp((-rect.top / mapHeight) * 40, -30, 40));
+      }
 
       let order = 0;
       for (const node of nodes) {
@@ -89,20 +107,23 @@ export function LevelMap() {
       window.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [unlockThroughOrder]);
+  }, [unlockThroughOrder, reducedMotion]);
 
   return (
-    <div className="relative w-full">
+    <div className={`relative w-full ${!reducedMotion ? "map-cursor-zone" : ""}`}>
+      <UnlockParticles />
+
+      {/* Far parallax haze */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 bottom-[45vh] opacity-50"
+        className="pointer-events-none absolute inset-x-0 top-0 bottom-[45vh] opacity-60"
         style={{
+          transform: reducedMotion ? undefined : `translateY(${parallax * 0.35}px)`,
           background:
-            "radial-gradient(ellipse 50% 18% at 30% 12%, var(--terrain-a), transparent), radial-gradient(ellipse 40% 16% at 70% 48%, var(--terrain-b), transparent)",
+            "radial-gradient(ellipse 55% 20% at 25% 10%, var(--terrain-a), transparent), radial-gradient(ellipse 45% 18% at 75% 40%, var(--terrain-b), transparent), radial-gradient(ellipse 50% 16% at 40% 70%, var(--terrain-a), transparent)",
         }}
         aria-hidden
       />
 
-      {/* Desktop map — ref is SVG bounds only */}
       <div ref={svgWrapRef} className="relative hidden md:block">
         <svg
           viewBox={`0 0 ${MAP_VIEWBOX.width} ${MAP_VIEWBOX.height}`}
@@ -115,15 +136,47 @@ export function LevelMap() {
               <stop offset="0%" stopColor="var(--path-stroke)" stopOpacity="0.95" />
               <stop offset="100%" stopColor="var(--teal)" stopOpacity="0.85" />
             </linearGradient>
+            <pattern
+              id="path-grain"
+              patternUnits="userSpaceOnUse"
+              width="8"
+              height="8"
+            >
+              <path
+                d="M0 8 L8 0"
+                stroke="var(--path-stroke)"
+                strokeWidth="0.6"
+                opacity="0.35"
+              />
+            </pattern>
           </defs>
+
+          <g
+            style={{
+              transform: reducedMotion
+                ? undefined
+                : `translate(0px, ${parallax * 0.55}px)`,
+            }}
+          >
+            <MapTerrain />
+          </g>
 
           <path
             d={pathD}
             fill="none"
             stroke="var(--path-track)"
-            strokeWidth="3.5"
+            strokeWidth="5"
             strokeLinecap="round"
             strokeLinejoin="round"
+          />
+          <path
+            d={pathD}
+            fill="none"
+            stroke="url(#path-grain)"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.5"
           />
 
           <path
@@ -142,13 +195,15 @@ export function LevelMap() {
               node={node}
               viewed={viewedIds.has(node.id)}
               locked={!unlockedIds.has(node.id)}
-              onSelect={() => openNode(node.id)}
+              onSelect={() => {
+                play("click");
+                openNode(node.id);
+              }}
             />
           ))}
         </svg>
       </div>
 
-      {/* Lets Character Sheet scroll up to the focus line */}
       <div className="hidden h-[45vh] md:block" aria-hidden />
 
       <div className="relative md:hidden">
@@ -168,7 +223,10 @@ export function LevelMap() {
                 <button
                   type="button"
                   disabled={locked}
-                  onClick={() => openNode(node.id)}
+                  onClick={() => {
+                    play("click");
+                    openNode(node.id);
+                  }}
                   className={`relative z-10 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-[11px] font-mono transition disabled:opacity-40 ${
                     node.type === "boss"
                       ? "border-[var(--coral)] bg-[var(--ink)] text-[var(--coral)]"
@@ -183,7 +241,10 @@ export function LevelMap() {
                 <button
                   type="button"
                   disabled={locked}
-                  onClick={() => openNode(node.id)}
+                  onClick={() => {
+                    play("click");
+                    openNode(node.id);
+                  }}
                   className="flex-1 border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-left transition hover:border-[var(--line-strong)] disabled:opacity-45"
                 >
                   <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--amber-dim)]">
