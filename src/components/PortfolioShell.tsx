@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useMapStore } from "@/store/map-store";
 import { Atmosphere } from "./Atmosphere";
 import { CommandPalette } from "./CommandPalette";
+import { MapCursor } from "./map/MapCursor";
 import { NodeModal } from "./NodeModal";
 import { ProgressHydrator } from "./ProgressHydrator";
 import { StatusBar } from "./StatusBar";
@@ -56,6 +57,7 @@ export function PortfolioShell() {
 
       <NodeModal />
       <CommandPalette />
+      <MapCursor enabled={activeTab === "map"} />
       <StatusBar />
     </div>
   );
