@@ -7,6 +7,9 @@ import { useTheme } from "./ThemeProvider";
 export function StatusBar() {
   const activeTab = useMapStore((s) => s.activeTab);
   const viewed = useMapStore((s) => s.viewedIds.size);
+  const unlocked = useMapStore((s) => s.unlockedIds.size);
+  const resetProgress = useMapStore((s) => s.resetProgress);
+  const setPaletteOpen = useMapStore((s) => s.setPaletteOpen);
   const label = TABS.find((t) => t.id === activeTab)?.label ?? activeTab;
   const { theme } = useTheme();
 
@@ -18,13 +21,37 @@ export function StatusBar() {
           portfolio / {label.toLowerCase()}
         </span>
         <span className="tabular-nums">
-          <span className="text-[var(--amber)]">{viewed}</span>/{nodes.length}{" "}
-          nodes
+          <span className="text-[var(--amber)]">{unlocked}</span>/{nodes.length}{" "}
+          unlocked
+        </span>
+        <span className="hidden tabular-nums md:inline">
+          {viewed} viewed
         </span>
       </div>
-      <div className="flex shrink-0 items-center gap-3">
-        <span className="hidden sm:inline">UTF-8</span>
-        <span className="hidden md:inline">TypeScript</span>
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <button
+          type="button"
+          onClick={() => setPaletteOpen(true)}
+          className="hidden text-[var(--parchment-dim)] transition hover:text-[var(--amber)] sm:inline"
+        >
+          ⌘K
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (
+              window.confirm(
+                "Reset map progress? All nodes except Spawn will lock again.",
+              )
+            ) {
+              resetProgress();
+            }
+          }}
+          className="text-[var(--parchment-dim)] transition hover:text-[var(--coral)]"
+          title="New Game+"
+        >
+          reset
+        </button>
         <span className="hidden capitalize sm:inline">{theme}</span>
         <span className="text-[var(--amber)]">level-map</span>
       </div>
