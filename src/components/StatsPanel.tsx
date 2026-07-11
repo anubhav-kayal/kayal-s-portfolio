@@ -2,7 +2,8 @@
 
 import { motion, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { competitiveStats } from "@/data/socials";
+import { GitHubContributions } from "@/components/GitHubContributions";
+import { competitiveStats, githubUsername } from "@/data/socials";
 
 function CountUp({
   value,
@@ -34,7 +35,7 @@ function CountUp({
 
 export function StatsPanel() {
   const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.35 });
+  const inView = useInView(ref, { once: true, amount: 0.25 });
   const { leetcode, codeforces } = competitiveStats;
 
   return (
@@ -50,13 +51,13 @@ export function StatsPanel() {
         Competitive stats
       </h2>
       <p className="mt-3 max-w-[52ch] text-[var(--parchment-dim)]">
-        Placeholder numbers for now. Phase 4 wires live LeetCode GraphQL +
-        Codeforces — count-up stays.
+        LeetCode / Codeforces placeholders for now. GitHub contributions load
+        live (or placeholder until you set your username).
       </p>
 
       <div className="mt-10 grid gap-px overflow-hidden border border-[var(--line)] bg-[var(--line)] sm:grid-cols-2">
         <motion.div
-          className="bg-[var(--ink)] p-6"
+          className="bg-[var(--surface)] p-6"
           initial={{ opacity: 0, y: 16 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.45 }}
@@ -93,7 +94,7 @@ export function StatsPanel() {
         </motion.div>
 
         <motion.div
-          className="bg-[var(--ink)] p-6"
+          className="bg-[var(--surface)] p-6"
           initial={{ opacity: 0, y: 16 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.45, delay: 0.08 }}
@@ -123,6 +124,15 @@ export function StatsPanel() {
           </dl>
         </motion.div>
       </div>
+
+      <motion.div
+        className="mt-6"
+        initial={{ opacity: 0, y: 16 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.45, delay: 0.12 }}
+      >
+        <GitHubContributions username={githubUsername} />
+      </motion.div>
     </section>
   );
 }
