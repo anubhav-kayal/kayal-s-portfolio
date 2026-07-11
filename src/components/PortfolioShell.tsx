@@ -2,9 +2,13 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useMapStore } from "@/store/map-store";
+import { Atmosphere } from "./Atmosphere";
+import { CommandPalette } from "./CommandPalette";
 import { NodeModal } from "./NodeModal";
+import { ProgressHydrator } from "./ProgressHydrator";
 import { StatusBar } from "./StatusBar";
 import { TopBar } from "./TopBar";
+import { AcademicsTab } from "./tabs/AcademicsTab";
 import { ContactTab } from "./tabs/ContactTab";
 import { ExperienceTab } from "./tabs/ExperienceTab";
 import { HomeTab } from "./tabs/HomeTab";
@@ -25,7 +29,8 @@ export function PortfolioShell() {
 
   return (
     <div className="relative flex min-h-full flex-col pb-7">
-      <div className="app-grid pointer-events-none absolute inset-0 opacity-[0.35]" />
+      <Atmosphere />
+      <ProgressHydrator />
       <TopBar />
 
       <main className="relative flex-1">
@@ -40,6 +45,7 @@ export function PortfolioShell() {
             {activeTab === "home" && <HomeTab />}
             {activeTab === "map" && <MapTab />}
             {activeTab === "experience" && <ExperienceTab />}
+            {activeTab === "academics" && <AcademicsTab />}
             {activeTab === "projects" && <ProjectsTab />}
             {activeTab === "stats" && <StatsTab />}
             {activeTab === "contact" && <ContactTab />}
@@ -49,6 +55,7 @@ export function PortfolioShell() {
       </main>
 
       <NodeModal />
+      <CommandPalette />
       <StatusBar />
     </div>
   );
