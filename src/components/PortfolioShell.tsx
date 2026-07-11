@@ -1,10 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMapStore } from "@/store/map-store";
 import { Atmosphere } from "./Atmosphere";
 import { CommandPalette } from "./CommandPalette";
-import { MapCursor } from "./map/MapCursor";
+import { DocumentTitle } from "./DocumentTitle";
+import { KonamiListener } from "./KonamiListener";
 import { NodeModal } from "./NodeModal";
 import { ProgressHydrator } from "./ProgressHydrator";
 import { StatusBar } from "./StatusBar";
@@ -13,10 +15,26 @@ import { AcademicsTab } from "./tabs/AcademicsTab";
 import { ContactTab } from "./tabs/ContactTab";
 import { ExperienceTab } from "./tabs/ExperienceTab";
 import { HomeTab } from "./tabs/HomeTab";
-import { MapTab } from "./tabs/MapTab";
 import { ProjectsTab } from "./tabs/ProjectsTab";
 import { ResumeTab } from "./tabs/ResumeTab";
 import { StatsTab } from "./tabs/StatsTab";
+
+const MapTab = dynamic(
+  () => import("./tabs/MapTab").then((m) => m.MapTab),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mx-auto max-w-5xl px-4 py-24 text-center font-mono text-xs uppercase tracking-[0.14em] text-[var(--parchment-dim)] sm:px-8">
+        Loading map…
+      </div>
+    ),
+  },
+);
+
+const MapCursor = dynamic(
+  () => import("./map/MapCursor").then((m) => m.MapCursor),
+  { ssr: false },
+);
 
 const tabMotion = {
   initial: { opacity: 0, y: 14, filter: "blur(4px)" },
@@ -32,6 +50,8 @@ export function PortfolioShell() {
     <div className="relative flex min-h-full flex-col pb-7">
       <Atmosphere />
       <ProgressHydrator />
+      <DocumentTitle />
+      <KonamiListener />
       <TopBar />
 
       <main className="relative flex-1">
