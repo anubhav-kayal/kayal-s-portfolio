@@ -1,5 +1,17 @@
 export type NodeType = "project" | "boss" | "start" | "checkpoint";
 
+export type NodeMedia = {
+  src: string;
+  alt: string;
+  type: "image" | "gif";
+};
+
+export type CaseStudy = {
+  problem: string;
+  approach: string;
+  impact: string;
+};
+
 export type MapNode = {
   id: string;
   type: NodeType;
@@ -9,10 +21,14 @@ export type MapNode = {
   summary: string;
   tech: string[];
   links: { github?: string; live?: string };
-  /** Boss nodes only — outcome, not a task list */
+  /** Sequential unlock index — 0 unlocks first */
+  unlockOrder: number;
+  /** Boss nodes — outcome, not a task list */
   impact?: string;
   company?: string;
   period?: string;
+  media?: NodeMedia[];
+  caseStudy?: CaseStudy;
 };
 
 export type SocialLink = {
@@ -37,4 +53,31 @@ export type CompetitiveStats = {
     maxRating: number;
     rank: string;
   };
+};
+
+export type AcademicEntry = {
+  id: string;
+  school: string;
+  degree: string;
+  field: string;
+  period: string;
+  gpa?: string;
+  highlights: string[];
+};
+
+export type AchievementKind =
+  | "award"
+  | "hackathon"
+  | "contest"
+  | "scholarship"
+  | "other";
+
+export type Achievement = {
+  id: string;
+  title: string;
+  org?: string;
+  year: string;
+  kind: AchievementKind;
+  summary: string;
+  link?: string;
 };
