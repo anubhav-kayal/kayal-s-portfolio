@@ -1,8 +1,14 @@
 import type { MapNode } from "./types";
 
+const projectCase = (name: string) => ({
+  problem: `Placeholder problem for ${name} — what pain existed before this existed?`,
+  approach: `Placeholder approach — key architecture or insight in 1–2 sentences.`,
+  impact: `Placeholder impact — measurable or qualitative outcome.`,
+});
+
 /**
  * Positions are in SVG viewBox units (900 × 2800).
- * Path winds left/right as it descends — geometry first, motion later.
+ * unlockOrder: 0 = start (always unlocked); higher = unlocks in sequence.
  */
 export const nodes: MapNode[] = [
   {
@@ -10,7 +16,8 @@ export const nodes: MapNode[] = [
     type: "start",
     title: "Spawn Point",
     x: 450,
-    y: 80,
+    y: 70,
+    unlockOrder: 0,
     summary:
       "Placeholder intro — swap this for a one-liner about who you are and what you build.",
     tech: [],
@@ -21,22 +28,40 @@ export const nodes: MapNode[] = [
     type: "project",
     title: "Project Alpha",
     x: 220,
-    y: 280,
+    y: 220,
+    unlockOrder: 1,
     summary:
       "Placeholder project summary. Replace with what it does and why it matters.",
     tech: ["TypeScript", "React", "Node"],
     links: { github: "#", live: "#" },
+    media: [
+      {
+        src: "/media/placeholder-project.svg",
+        alt: "Project Alpha preview placeholder",
+        type: "image",
+      },
+    ],
+    caseStudy: projectCase("Project Alpha"),
   },
   {
     id: "project-2",
     type: "project",
     title: "Project Beta",
     x: 680,
-    y: 460,
+    y: 370,
+    unlockOrder: 2,
     summary:
       "Placeholder project summary. Replace with what it does and why it matters.",
     tech: ["Python", "FastAPI", "Postgres"],
     links: { github: "#", live: "#" },
+    media: [
+      {
+        src: "/media/placeholder-project.svg",
+        alt: "Project Beta preview placeholder",
+        type: "image",
+      },
+    ],
+    caseStudy: projectCase("Project Beta"),
   },
   {
     id: "boss-1",
@@ -45,7 +70,8 @@ export const nodes: MapNode[] = [
     company: "Company One",
     period: "Summer 20XX",
     x: 280,
-    y: 660,
+    y: 520,
+    unlockOrder: 3,
     summary: "Placeholder role blurb — keep it short; impact carries the node.",
     tech: ["React", "TypeScript"],
     links: {},
@@ -57,22 +83,40 @@ export const nodes: MapNode[] = [
     type: "project",
     title: "Project Gamma",
     x: 720,
-    y: 860,
+    y: 670,
+    unlockOrder: 4,
     summary:
       "Placeholder project summary. Replace with what it does and why it matters.",
     tech: ["Next.js", "Tailwind", "Vercel"],
     links: { github: "#", live: "#" },
+    media: [
+      {
+        src: "/media/placeholder-project.svg",
+        alt: "Project Gamma preview placeholder",
+        type: "image",
+      },
+    ],
+    caseStudy: projectCase("Project Gamma"),
   },
   {
     id: "project-4",
     type: "project",
     title: "Project Delta",
     x: 200,
-    y: 1060,
+    y: 820,
+    unlockOrder: 5,
     summary:
       "Placeholder project summary. Replace with what it does and why it matters.",
     tech: ["Go", "gRPC", "Redis"],
     links: { github: "#" },
+    media: [
+      {
+        src: "/media/placeholder-project.svg",
+        alt: "Project Delta preview placeholder",
+        type: "image",
+      },
+    ],
+    caseStudy: projectCase("Project Delta"),
   },
   {
     id: "boss-2",
@@ -81,7 +125,8 @@ export const nodes: MapNode[] = [
     company: "Company Two",
     period: "Fall 20XX",
     x: 650,
-    y: 1260,
+    y: 970,
+    unlockOrder: 6,
     summary: "Placeholder role blurb — keep it short; impact carries the node.",
     tech: ["Java", "Spring", "AWS"],
     links: {},
@@ -93,11 +138,20 @@ export const nodes: MapNode[] = [
     type: "project",
     title: "Project Epsilon",
     x: 260,
-    y: 1460,
+    y: 1120,
+    unlockOrder: 7,
     summary:
       "Placeholder project summary. Replace with what it does and why it matters.",
     tech: ["Rust", "WASM", "WebGL"],
     links: { github: "#", live: "#" },
+    media: [
+      {
+        src: "/media/placeholder-project.svg",
+        alt: "Project Epsilon preview placeholder",
+        type: "image",
+      },
+    ],
+    caseStudy: projectCase("Project Epsilon"),
   },
   {
     id: "boss-3",
@@ -106,7 +160,8 @@ export const nodes: MapNode[] = [
     company: "Company Three",
     period: "Spring 20XX",
     x: 700,
-    y: 1660,
+    y: 1270,
+    unlockOrder: 8,
     summary: "Placeholder role blurb — keep it short; impact carries the node.",
     tech: ["Python", "PyTorch", "Docker"],
     links: {},
@@ -118,22 +173,40 @@ export const nodes: MapNode[] = [
     type: "project",
     title: "Project Zeta",
     x: 240,
-    y: 1860,
+    y: 1420,
+    unlockOrder: 9,
     summary:
       "Placeholder project summary. Replace with what it does and why it matters.",
     tech: ["C++", "OpenCV", "CUDA"],
     links: { github: "#" },
+    media: [
+      {
+        src: "/media/placeholder-project.svg",
+        alt: "Project Zeta preview placeholder",
+        type: "image",
+      },
+    ],
+    caseStudy: projectCase("Project Zeta"),
   },
   {
     id: "project-7",
     type: "project",
     title: "Project Eta",
     x: 680,
-    y: 2060,
+    y: 1570,
+    unlockOrder: 10,
     summary:
       "Placeholder project summary. Replace with what it does and why it matters.",
     tech: ["Kotlin", "Android", "Firebase"],
     links: { github: "#", live: "#" },
+    media: [
+      {
+        src: "/media/placeholder-project.svg",
+        alt: "Project Eta preview placeholder",
+        type: "image",
+      },
+    ],
+    caseStudy: projectCase("Project Eta"),
   },
   {
     id: "boss-4",
@@ -142,7 +215,8 @@ export const nodes: MapNode[] = [
     company: "Company Four",
     period: "Summer 20XX",
     x: 320,
-    y: 2260,
+    y: 1720,
+    unlockOrder: 11,
     summary: "Placeholder role blurb — keep it short; impact carries the node.",
     tech: ["TypeScript", "GraphQL", "Kubernetes"],
     links: {},
@@ -154,13 +228,25 @@ export const nodes: MapNode[] = [
     type: "checkpoint",
     title: "Character Sheet",
     x: 450,
-    y: 2480,
+    y: 1880,
+    unlockOrder: 12,
     summary:
       "Live competitive programming stats land here — LeetCode + Codeforces placeholders for now.",
     tech: [],
     links: {},
   },
 ];
+
+export const nodesByUnlock = [...nodes].sort(
+  (a, b) => a.unlockOrder - b.unlockOrder,
+);
+
+export function getNextUnlockId(unlockedIds: Set<string>): string | null {
+  for (const node of nodesByUnlock) {
+    if (!unlockedIds.has(node.id)) return node.id;
+  }
+  return null;
+}
 
 /** Smooth path through every node, in order */
 export function buildPathD(mapNodes: MapNode[]): string {
@@ -176,4 +262,6 @@ export function buildPathD(mapNodes: MapNode[]): string {
   return d;
 }
 
-export const MAP_VIEWBOX = { width: 900, height: 2680 } as const;
+export const MAP_VIEWBOX = { width: 900, height: 2000 } as const;
+
+export const PROGRESS_STORAGE_KEY = "portfolio-progress";
