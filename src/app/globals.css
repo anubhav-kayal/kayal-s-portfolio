@@ -28,6 +28,11 @@
   --palette-row: #222836;
   --palette-row-active: #2a3344;
   --palette-border: rgba(243, 237, 224, 0.18);
+  --gh-0: #171b26;
+  --gh-1: #243d36;
+  --gh-2: #2f6b55;
+  --gh-3: #4a9c8c;
+  --gh-4: #e3a857;
   --background: var(--ink);
   --foreground: var(--parchment);
 }
@@ -59,6 +64,11 @@
   --palette-row: #f7f1e4;
   --palette-row-active: #efe4cc;
   --palette-border: rgba(26, 31, 43, 0.16);
+  --gh-0: #ebe4d4;
+  --gh-1: #c5d4c8;
+  --gh-2: #7aa892;
+  --gh-3: #2f7a6c;
+  --gh-4: #9a6420;
   --background: var(--ink);
   --foreground: var(--parchment);
 }
@@ -153,6 +163,42 @@ body {
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
+}
+
+@media (pointer: fine) {
+  .map-cursor-zone,
+  .map-cursor-zone * {
+    cursor: none !important;
+  }
+}
+
+@keyframes boss-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px) rotate(-0.4deg);
+  }
+  40% {
+    transform: translateX(4px) rotate(0.4deg);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+.boss-shake {
+  animation: boss-shake 0.28s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boss-shake {
+    animation: none;
+  }
 }
 
 ::selection {
