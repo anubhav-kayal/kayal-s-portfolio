@@ -4,6 +4,8 @@
 [data-theme="dark"] {
   --ink: #11141c;
   --ink-2: #171b26;
+  --surface: #1c2130;
+  --surface-elevated: #232836;
   --parchment: #f3ede0;
   --parchment-dim: #c9c2ad;
   --amber: #e3a857;
@@ -12,25 +14,51 @@
   --teal: #4a9c8c;
   --line: rgba(243, 237, 224, 0.14);
   --line-strong: rgba(243, 237, 224, 0.28);
-  --grid-line: rgba(243, 237, 224, 0.04);
-  --overlay: rgba(0, 0, 0, 0.7);
+  --grid-line: rgba(243, 237, 224, 0.055);
+  --grid-line-strong: rgba(243, 237, 224, 0.09);
+  --overlay: rgba(0, 0, 0, 0.72);
+  --glow: rgba(227, 168, 87, 0.22);
+  --glow-teal: rgba(74, 156, 140, 0.16);
+  --path-stroke: #e3a857;
+  --path-track: rgba(243, 237, 224, 0.22);
+  --terrain-a: rgba(227, 168, 87, 0.08);
+  --terrain-b: rgba(74, 156, 140, 0.07);
+  --noise-opacity: 0.045;
+  --palette-bg: #1a1f2c;
+  --palette-row: #222836;
+  --palette-row-active: #2a3344;
+  --palette-border: rgba(243, 237, 224, 0.18);
   --background: var(--ink);
   --foreground: var(--parchment);
 }
 
 [data-theme="light"] {
-  --ink: #f4efe4;
-  --ink-2: #ebe4d4;
+  --ink: #e8e0d0;
+  --ink-2: #f3ede0;
+  --surface: #faf6ec;
+  --surface-elevated: #fffdf7;
   --parchment: #1a1f2b;
-  --parchment-dim: #5a6170;
-  --amber: #b8792a;
-  --amber-dim: #8a5f22;
-  --coral: #c45a38;
-  --teal: #2f7a6c;
-  --line: rgba(26, 31, 43, 0.1);
-  --line-strong: rgba(26, 31, 43, 0.2);
-  --grid-line: rgba(26, 31, 43, 0.05);
-  --overlay: rgba(26, 31, 43, 0.45);
+  --parchment-dim: #4a5160;
+  --amber: #9a6420;
+  --amber-dim: #7a4f18;
+  --coral: #b84a2e;
+  --teal: #246b5e;
+  --line: rgba(26, 31, 43, 0.12);
+  --line-strong: rgba(26, 31, 43, 0.22);
+  --grid-line: rgba(26, 31, 43, 0.07);
+  --grid-line-strong: rgba(26, 31, 43, 0.11);
+  --overlay: rgba(26, 31, 43, 0.55);
+  --glow: rgba(154, 100, 32, 0.14);
+  --glow-teal: rgba(36, 107, 94, 0.1);
+  --path-stroke: #9a6420;
+  --path-track: rgba(26, 31, 43, 0.28);
+  --terrain-a: rgba(154, 100, 32, 0.1);
+  --terrain-b: rgba(36, 107, 94, 0.08);
+  --noise-opacity: 0.07;
+  --palette-bg: #fffdf8;
+  --palette-row: #f7f1e4;
+  --palette-row-active: #efe4cc;
+  --palette-border: rgba(26, 31, 43, 0.16);
   --background: var(--ink);
   --foreground: var(--parchment);
 }
@@ -53,16 +81,71 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
   min-height: 100%;
   transition:
-    background-color 0.35s ease,
-    color 0.35s ease;
+    background-color 0.4s ease,
+    color 0.4s ease;
 }
 
-.app-grid {
+/* Layered atmosphere — stronger in light mode */
+.app-atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 0.4s ease;
+}
+
+.app-atmosphere__wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% -8%, var(--glow), transparent 58%),
+    radial-gradient(ellipse 45% 35% at 92% 18%, var(--glow-teal), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 8% 70%, var(--terrain-b), transparent 50%);
+}
+
+.app-atmosphere__grid {
+  position: absolute;
+  inset: 0;
   background-image:
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black, transparent);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 20%, transparent 75%);
+}
+
+.app-atmosphere__grid-fine {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line-strong) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-strong) 1px, transparent 1px);
+  background-size: 160px 160px;
+  opacity: 0.7;
+  mask-image: radial-gradient(ellipse 85% 65% at 50% 25%, black, transparent 70%);
+}
+
+.app-atmosphere__noise {
+  position: absolute;
+  inset: 0;
+  opacity: var(--noise-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+}
+
+[data-theme="dark"] .app-atmosphere__noise {
+  mix-blend-mode: overlay;
+}
+
+.app-atmosphere__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 75% 65% at 50% 40%, transparent 40%, var(--ink) 100%);
+  opacity: 0.35;
+}
+
+[data-theme="light"] .app-atmosphere__vignette {
+  opacity: 0.22;
 }
 
 .scrollbar-none {
@@ -78,6 +161,6 @@ body {
 }
 
 [data-theme="light"] ::selection {
-  background: rgba(184, 121, 42, 0.28);
+  background: rgba(154, 100, 32, 0.28);
   color: var(--parchment);
 }
