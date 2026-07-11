@@ -14,20 +14,15 @@ const PHRASES = [
 
 export function HomeTab() {
   const setTab = useMapStore((s) => s.setTab);
+  const setPaletteOpen = useMapStore((s) => s.setPaletteOpen);
   const viewedCount = useMapStore((s) => s.viewedIds.size);
+  const unlockedCount = useMapStore((s) => s.unlockedIds.size);
+  const resetProgress = useMapStore((s) => s.resetProgress);
   const projectCount = nodes.filter((n) => n.type === "project").length;
   const bossCount = nodes.filter((n) => n.type === "boss").length;
 
   return (
     <div className="relative overflow-hidden px-5 py-16 sm:px-10 sm:py-24">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-50"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 50% at 50% -10%, rgba(227,168,87,0.2), transparent 60%), radial-gradient(ellipse 40% 30% at 90% 20%, rgba(74,156,140,0.14), transparent 50%)",
-        }}
-      />
-
       <div className="relative mx-auto max-w-3xl">
         <motion.p
           className="mb-4 font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--amber)]"
@@ -66,8 +61,15 @@ export function HomeTab() {
           transition={{ delay: 0.22 }}
         >
           A scroll-through level map of work so far — projects as waypoints,
-          internships as boss encounters, competitive stats as a live character
-          sheet.
+          internships as boss encounters, academics on the side path. Press{" "}
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className="font-mono text-[var(--amber)] underline-offset-2 hover:underline"
+          >
+            ⌘K
+          </button>{" "}
+          to jump anywhere.
         </motion.p>
 
         <motion.div
@@ -79,21 +81,36 @@ export function HomeTab() {
           <button
             type="button"
             onClick={() => setTab("map")}
-            className="border border-[var(--amber)] bg-[rgba(227,168,87,0.12)] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.12em] text-[var(--amber)] transition hover:bg-[rgba(227,168,87,0.22)]"
+            className="border border-[var(--amber)] bg-[var(--glow)] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.12em] text-[var(--amber)] transition hover:brightness-110"
           >
             Enter the map →
           </button>
           <button
             type="button"
-            onClick={() => setTab("experience")}
-            className="border border-[var(--line-strong)] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.12em] text-[var(--parchment-dim)] transition hover:border-[var(--parchment-dim)] hover:text-[var(--parchment)]"
+            onClick={() => setTab("academics")}
+            className="border border-[var(--line-strong)] bg-[var(--surface)] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.12em] text-[var(--parchment-dim)] transition hover:border-[var(--parchment-dim)] hover:text-[var(--parchment)]"
           >
-            Boss fights
+            Academics
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Reset map progress? All nodes except Spawn will lock again.",
+                )
+              ) {
+                resetProgress();
+              }
+            }}
+            className="border border-[var(--line)] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.12em] text-[var(--parchment-dim)] transition hover:text-[var(--coral)]"
+          >
+            New Game+
           </button>
         </motion.div>
 
         <motion.div
-          className="mt-14 grid grid-cols-2 border-y border-[var(--line-strong)] sm:grid-cols-4"
+          className="mt-14 grid grid-cols-2 border-y border-[var(--line-strong)] bg-[var(--surface)]/40 sm:grid-cols-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.38 }}
@@ -101,8 +118,11 @@ export function HomeTab() {
           {[
             { num: String(projectCount), label: "projects" },
             { num: String(bossCount), label: "internships" },
-            { num: `${viewedCount}/${nodes.length}`, label: "explored" },
-            { num: "7", label: "tabs" },
+            {
+              num: `${unlockedCount}/${nodes.length}`,
+              label: "unlocked",
+            },
+            { num: `${viewedCount}`, label: "viewed" },
           ].map((stat, i) => (
             <div
               key={stat.label}
